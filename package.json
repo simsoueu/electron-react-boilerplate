@@ -1,6 +1,7 @@
 {
-  "name": "electron-react-boilerplate",
-  "description": "A foundation for scalable desktop apps",
+  "name": "shiva",
+  "productName": "Shiva - Pesquisa de Preços",
+  "description": "Public Procurement Price Research Consolidation Tool (IN 65/2021 & TCU Note 8/2023)",
   "keywords": [
     "electron",
     "boilerplate",
@@ -102,12 +103,29 @@
   },
   "dependencies": {
     "@electron/notarize": "^3.0.0",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@types/uuid": "^10.0.0",
+    "autoprefixer": "^10.4.24",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "electron-debug": "^4.1.0",
     "electron-log": "^5.3.2",
     "electron-updater": "^6.3.9",
+    "lucide-react": "^0.575.0",
+    "papaparse": "^5.5.3",
+    "postcss": "^8.5.6",
+    "postcss-loader": "^8.2.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-router-dom": "^7.3.0"
+    "react-router-dom": "^7.3.0",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^3.4.19",
+    "tailwindcss-animate": "^1.0.7",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.7.1",
@@ -118,6 +136,7 @@
     "@testing-library/react": "^16.2.0",
     "@types/jest": "^29.5.14",
     "@types/node": "22.13.10",
+    "@types/papaparse": "^5.5.2",
     "@types/react": "^19.0.11",
     "@types/react-dom": "^19.0.4",
     "@types/react-test-renderer": "^19.0.0",
@@ -175,8 +194,8 @@
     "webpack-merge": "^6.0.1"
   },
   "build": {
-    "productName": "ElectronReact",
-    "appId": "org.erb.ElectronReact",
+    "productName": "Shiva",
+    "appId": "com.shiva.pesquisaprecos",
     "asar": true,
     "afterSign": ".erb/scripts/notarize.js",
     "asarUnpack": "**\\*.{node,dll}",
@@ -235,8 +254,8 @@
     ],
     "publish": {
       "provider": "github",
-      "owner": "electron-react-boilerplate",
-      "repo": "electron-react-boilerplate"
+      "owner": "shiva",
+      "repo": "shiva"
     }
   },
   "collective": {

@@ -9,11 +9,15 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import { parseCSVFile } from './csv-parser';
+
+let projectData: any = null;
 
 class AppUpdater {
   constructor() {
@@ -24,6 +28,109 @@ class AppUpdater {
 }
 
 let mainWindow: BrowserWindow | null = null;
+
+ipcMain.handle('project:initialize', async (_event, data) => {
+  console.log('Initializing project:', data);
+  projectData = {
+    id: uuidv4(),
+    numeroProcesso: data.numeroProcesso || '138/2025',
+    uasg: data.uasg || '123456',
+    responsavel: data.responsavel || 'João Silva',
+    dataPesquisa: data.dataPesquisa || new Date().toISOString(),
+    items: [],
+  };
+  return projectData;
+});
+
+ipcMain.handle(
+  'data:ingest-files',
+  async (_event, files: { datasetI?: string; datasetII?: string }) => {
+    console.log('Ingesting files...');
+
+    try {
+      const allItems: any[] = [];
+
+      if (files.datasetI) {
+        const parsed = parseCSVFile(files.datasetI);
+        allItems.push(...parsed.items);
+      }
+
+      if (files.datasetII) {
+        const parsed = parseCSVFile(files.datasetII);
+        for (const item of parsed.items) {
+          for (const quote of item.cotacoes) {
+            quote.datasetFonte = 'PARAM_II_CONTRATACOES_SIMILARES';
+          }
+          const existing = allItems.find(
+            (i) => i.numeroItem === item.numeroItem,
+          );
+          if (existing) {
+            existing.cotacoes.push(...item.cotacoes);
+          } else {
+            allItems.push(item);
+          }
+        }
+      }
+
+      if (!projectData) {
+        projectData = {
+          id: uuidv4(),
+          numeroProcesso: '138/2025',
+          uasg: '420001',
+          responsavel: 'João Silva',
+          dataPesquisa: new Date().toISOString().split('T')[0],
+          items: [],
+        };
+      }
+
+      projectData.items = allItems;
+
+      return {
+        success: true,
+        message: 'Files ingested successfully',
+        project: projectData,
+      };
+    } catch (error) {
+      console.error('Error ingesting files:', error);
+      return {
+        success: false,
+        message: 'Error ingesting files: ' + String(error),
+      };
+    }
+  },
+);
+
+ipcMain.handle('engine:run-saneamento', async (_event) => {
+  console.log('Running saneamento engine');
+  return { success: true, message: 'Sanitization complete (mock)' };
+});
+
+ipcMain.handle(
+  'item:override-status',
+  async (_event, { itemId, quoteId, newStatus, justification }) => {
+    console.log('Override status:', {
+      itemId,
+      quoteId,
+      newStatus,
+      justification,
+    });
+    return { success: true };
+  },
+);
+
+ipcMain.handle('export:generate-pdf', async (_event, data) => {
+  console.log('Generating PDF:', data);
+  return { success: true, path: '/tmp/nota-tecnica.pdf' };
+});
+
+ipcMain.handle('export:generate-excel', async (_event, data) => {
+  console.log('Generating Excel:', data);
+  return { success: true, path: '/tmp/memoria-calculo.xlsx' };
+});
+
+ipcMain.handle('get-project-data', async () => {
+  return projectData;
+});
 
 ipcMain.on('ipc-example', async (event, arg) => {
   const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
